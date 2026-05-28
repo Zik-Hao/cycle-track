@@ -1,15 +1,10 @@
 {
   "name": "Cycle Tracker",
   "short_name": "Цикл",
-  "description": "Трекер менструального цикла",
   "start_url": "./index.html",
-  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
-  "theme_color": "#ec4899",
   "background_color": "#fdf2f8",
-  "lang": "ru",
-  "categories": ["health", "lifestyle"],
+  "theme_color": "#ec4899",
   "icons": [
     {
       "src": "./icon.svg",
