@@ -89,7 +89,7 @@
 
         .settings-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
         .settings-content{max-height:0;overflow:hidden;transition:max-height .3s ease}
-        .settings-card.open .settings-content{max-height:1000px}
+        .settings-card.open .settings-content{max-height:1200px} /* Увеличили высоту для нового поля */
         .settings-card.open .settings-arrow{transform:rotate(180deg)}
         .settings-arrow{transition:transform .2s;font-size:.8rem;color:var(--primary)}
 
@@ -176,6 +176,11 @@
 
                 <label class="field-label" for="remind-time">Время уведомления</label>
                 <input type="time" id="remind-time" value="09:00">
+
+                <!-- НОВОЕ ПОЛЕ: Заметка для уведомления -->
+                <label class="field-label" for="notif-custom-msg">💊 Личное напоминание</label>
+                <textarea id="notif-custom-msg" rows="2" placeholder="Например: 'Выпить таблетку', 'Купить прокладки'..."></textarea>
+                <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">Этот текст будет добавлен к каждому уведомлению.</div>
 
                 <div id="permission-status" class="permission-status default">
                     Проверка разрешения...
@@ -272,6 +277,7 @@
                 enabled: true,
                 remindDaysBefore: [2, 1],
                 remindTime: '09:00',
+                customMessage: '', // Новое поле для личной заметки
                 lastNotified: null
             }
         };
@@ -306,6 +312,12 @@
                 settings.notifications.remindTime = this.value;
                 saveSettings();
                 showToast('⏰ Время сохранено');
+            });
+
+            // Сохранение личной заметки при изменении
+            document.getElementById('notif-custom-msg').addEventListener('input', function() {
+                settings.notifications.customMessage = this.value.trim();
+                saveSettings();
             });
 
             var btns = document.querySelectorAll('.day-type-btn');
@@ -443,6 +455,9 @@
             var master = document.getElementById('notif-master');
             var details = document.getElementById('notif-details');
             
+            // Заполняем поле заметки текущим значением
+            document.getElementById('notif-custom-msg').value = settings.notifications.customMessage || '';
+
             if (settings.notifications.enabled) {
                 master.classList.add('on');
                 master.classList.remove('disabled');
@@ -510,8 +525,14 @@
                 showToast('⚠️ Сначала разрешите уведомления');
                 return;
             }
+            var customMsg = settings.notifications.customMessage;
+            var bodyText = 'Это тестовое уведомление.';
+            if (customMsg) {
+                bodyText += '\n\n💊 ' + customMsg;
+            }
+            
             showNotification('🌸 Тестовое уведомление', {
-                body: 'Если вы это видите — всё работает!',
+                body: bodyText,
                 tag: 'test',
                 icon: './icon.svg'
             });
@@ -550,11 +571,17 @@
 
             var message = '';
             if (daysLeft === 0) {
-                message = 'Сегодня ожидается начало менструации. Не забудьте подготовиться!';
+                message = 'Сегодня ожидается начало менструации.';
             } else if (daysLeft === 1) {
                 message = 'Завтра ожидается начало менструации. Остался 1 день.';
             } else {
                 message = 'До начала менструации осталось ' + daysLeft + ' дн.';
+            }
+
+            // Добавляем личную заметку
+            var customMsg = settings.notifications.customMessage;
+            if (customMsg) {
+                message += '\n\n💊 ' + customMsg;
             }
 
             showNotification('🌸 Cycle Tracker', {
