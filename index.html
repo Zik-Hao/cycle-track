@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#ec4899">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Cycle Tracker">
@@ -11,126 +13,802 @@
     <link rel="apple-touch-icon" href="./icon.svg">
     <title>Cycle Tracker</title>
     <style>
-        :root { --bg:#fdf2f8;--card:#fff;--primary:#ec4899;--primary-light:#fce7f3;--text:#1f2937;--muted:#6b7280;--radius:16px;--safe-bottom:env(safe-area-inset-bottom,0px); }
-        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-        body{font-family:-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;padding:1rem;max-width:480px;margin:0 auto;line-height:1.5}
-        h1{font-size:1.5rem;text-align:center;margin-bottom:1rem;color:var(--primary)}
-        h2{font-size:1rem;margin-bottom:.75rem}
-        .card{background:var(--card);border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem;box-shadow:0 2px 12px rgba(236,72,153,.06)}
+        :root {
+            --bg: #fdf2f8;
+            --card: #fff;
+            --primary: #ec4899;
+            --primary-light: #fce7f3;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --radius: 16px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
 
-        .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;font-weight:700}
-        .cal-nav{background:none;border:none;font-size:1.2rem;cursor:pointer;padding:.5rem;color:var(--primary)}
-        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-bottom:1rem}
-        .cal-weekday{font-size:.7rem;color:var(--muted);padding-bottom:.5rem;text-transform:uppercase}
-        .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.9rem;position:relative;cursor:default}
-        .cal-day.empty{pointer-events:none}
-        .cal-day.today{border:2px solid var(--primary);font-weight:700}
-        .cal-day.period-start{background:#e11d48;color:#fff;font-weight:700}
-        .cal-day.period-day{background:var(--primary-light);color:#be185d}
-        .cal-day.period-end{background:#fbcfe8;color:#9d174d;border:1px solid #f472b6}
-        .cal-day.future-period{background:#ffe4e6;color:#f43f5e;opacity:.8;border:1px dashed var(--primary)}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent
+        }
 
-        .legend{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:.75rem;font-size:.7rem;color:var(--muted)}
-        .legend-item{display:flex;align-items:center;gap:.25rem}
-        .legend-dot{width:10px;height:10px;border-radius:50%}
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            padding: 1rem;
+            padding-bottom: calc(4rem + var(--safe-bottom));
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.5
+        }
 
-        .countdown-box{text-align:center;padding:1rem;background:var(--primary-light);border-radius:12px;margin-top:.5rem}
-        .countdown-num{font-size:2rem;font-weight:800;color:var(--primary);line-height:1}
-        .countdown-label{font-size:.8rem;color:var(--muted);margin-top:.25rem}
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--primary)
+        }
 
-        label.field-label{display:block;font-size:.8rem;font-weight:600;margin:1rem 0 .4rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-        label.field-label:first-of-type{margin-top:0}
-        input[type="date"],input[type="time"],select,textarea{width:100%;padding:.85rem;border:2px solid var(--primary-light);border-radius:12px;font-size:16px;background:var(--bg);outline:none;font-family:inherit;appearance:none}
-        input:focus,select:focus,textarea:focus{border-color:var(--primary);background:#fff}
-        textarea{resize:none;min-height:70px}
+        h2 {
+            font-size: 1rem;
+            margin-bottom: .75rem
+        }
 
-        .day-type-selector{display:flex;gap:.5rem;margin-bottom:.5rem}
-        .day-type-btn{flex:1;padding:.75rem;border:2px solid var(--primary-light);border-radius:12px;background:var(--card);color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;text-align:center;transition:.15s}
-        .day-type-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: .75rem;
+            box-shadow: 0 2px 12px rgba(236, 72, 153, .06)
+        }
 
-        .ended-toggle{display:flex;align-items:center;gap:.75rem;margin:1rem 0;padding:.85rem;border:2px solid var(--primary-light);border-radius:12px;cursor:pointer;transition:.15s;user-select:none}
-        .ended-toggle.checked{border-color:var(--primary);background:var(--primary-light)}
-        .ended-toggle input{display:none}
-        .ended-checkbox{width:24px;height:24px;border-radius:6px;border:2px solid var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:.15s;flex-shrink:0}
-        .ended-toggle.checked .ended-checkbox{background:var(--primary);border-color:var(--primary);color:#fff}
-        .ended-label{font-size:.9rem;font-weight:600}
-        .ended-hint{font-size:.7rem;color:var(--muted);margin-top:.1rem}
+        /* Кнопка настроек */
+        .settings-fab {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card);
+            border: none;
+            box-shadow: 0 2px 12px rgba(236, 72, 153, .15);
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
 
-        .symptoms-grid{display:flex;flex-wrap:wrap;gap:.5rem}
-        .symptom-chip input{position:absolute;opacity:0;width:0;height:0}
-        .symptom-chip span{display:inline-flex;align-items:center;padding:.5rem .85rem;border-radius:24px;background:var(--primary-light);font-size:.85rem;cursor:pointer;min-height:44px;transition:.15s}
-        .symptom-chip input:checked+span{background:var(--primary);color:#fff}
+        .settings-fab:active {
+            transform: scale(.9)
+        }
 
-        #save-btn{width:100%;padding:1rem;margin-top:1.5rem;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;min-height:52px}
-        #save-btn:active{transform:scale(.97)}
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-weight: 700
+        }
 
-        .data-actions{display:flex;gap:.5rem;margin-top:1rem}
-        .data-btn{flex:1;padding:.75rem;border:2px solid var(--primary-light);border-radius:12px;background:var(--card);color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;text-align:center}
-        #import-file{display:none}
+        .cal-nav {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: .5rem;
+            color: var(--primary)
+        }
 
-        .history-month-group{margin-bottom:.5rem}
-        .history-month-header{display:flex;justify-content:space-between;align-items:center;padding:.85rem 1rem;background:var(--primary-light);border-radius:12px;font-weight:700;font-size:.95rem;color:var(--primary);cursor:pointer;user-select:none;transition:.15s}
-        .history-month-header:active{background:#fbcfe8}
-        .history-month-arrow{transition:transform .2s;font-size:.8rem}
-        .history-month-group.open .history-month-arrow{transform:rotate(180deg)}
-        .history-month-content{max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0 .5rem}
-        .history-month-group.open .history-month-content{max-height:3000px}
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+            margin-bottom: 1rem
+        }
 
-        .history-cycle{padding:.75rem 0;border-bottom:1px solid var(--primary-light)}
-        .history-cycle:last-child{border-bottom:none}
-        .history-cycle-title{font-weight:700;color:#e11d48;margin-bottom:.3rem;font-size:.9rem}
-        .history-day-entry{margin-left:.5rem;padding:.5rem;font-size:.8rem;border-bottom:1px dashed #fce7f3;border-radius:8px;margin-bottom:.25rem;cursor:pointer;transition:.15s}
-        .history-day-entry:last-child{border-bottom:none}
-        .history-day-entry:active{background:var(--primary-light)}
-        .history-note{background:var(--primary-light);padding:.3rem .5rem;border-radius:6px;margin-top:.2rem;font-size:.75rem;word-break:break-word}
-        .edit-hint{font-size:.65rem;color:var(--muted);margin-left:auto;padding-left:.5rem}
-        .end-badge{display:inline-block;font-size:.65rem;background:#fbcfe8;color:#9d174d;padding:.1rem .4rem;border-radius:4px;margin-left:.3rem;font-weight:700}
-        .empty-history{text-align:center;color:var(--muted);padding:1.5rem;font-size:.9rem}
+        .cal-weekday {
+            font-size: .7rem;
+            color: var(--muted);
+            padding-bottom: .5rem;
+            text-transform: uppercase
+        }
 
-        .settings-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
-        .settings-content{max-height:0;overflow:hidden;transition:max-height .3s ease}
-        .settings-card.open .settings-content{max-height:1200px} /* Увеличили высоту для нового поля */
-        .settings-card.open .settings-arrow{transform:rotate(180deg)}
-        .settings-arrow{transition:transform .2s;font-size:.8rem;color:var(--primary)}
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: .9rem;
+            position: relative;
+            cursor: default
+        }
 
-        .notif-master-toggle{display:flex;align-items:center;justify-content:space-between;padding:.85rem;background:var(--primary-light);border-radius:12px;margin-bottom:.75rem;cursor:pointer;user-select:none}
-        .notif-master-toggle.disabled{opacity:.5}
-        .notif-switch{width:44px;height:26px;border-radius:13px;background:#d1d5db;position:relative;transition:.2s;flex-shrink:0}
-        .notif-switch::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}
-        .notif-master-toggle.on .notif-switch{background:var(--primary)}
-        .notif-master-toggle.on .notif-switch::after{left:21px}
+        .cal-day.empty {
+            pointer-events: none
+        }
 
-        .remind-days{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
-        .remind-chip input{position:absolute;opacity:0;width:0;height:0}
-        .remind-chip span{display:inline-flex;align-items:center;padding:.5rem .75rem;border-radius:20px;background:var(--bg);border:2px solid var(--primary-light);font-size:.8rem;cursor:pointer;min-height:40px;transition:.15s}
-        .remind-chip input:checked+span{background:var(--primary);color:#fff;border-color:var(--primary)}
+        .cal-day.today {
+            border: 2px solid var(--primary);
+            font-weight: 700
+        }
 
-        .permission-status{font-size:.8rem;padding:.6rem .8rem;border-radius:8px;margin-top:.5rem;text-align:center}
-        .permission-status.granted{background:#d1fae5;color:#065f46}
-        .permission-status.denied{background:#fee2e2;color:#991b1b}
-        .permission-status.default{background:#fef3c7;color:#92400e}
+        .cal-day.period-start {
+            background: #e11d48;
+            color: #fff;
+            font-weight: 700
+        }
 
-        .test-btn{width:100%;padding:.75rem;margin-top:.75rem;border:2px solid var(--primary);border-radius:12px;background:var(--card);color:var(--primary);font-size:.85rem;font-weight:600;cursor:pointer}
-        .test-btn:active{background:var(--primary-light)}
-        .test-btn:disabled{opacity:.4;cursor:not-allowed}
+        .cal-day.period-day {
+            background: var(--primary-light);
+            color: #be185d
+        }
 
-        .settings-hint{font-size:.7rem;color:var(--muted);margin-top:.75rem;padding:.6rem;background:var(--bg);border-radius:8px;line-height:1.4}
+        .cal-day.period-end {
+            background: #fbcfe8;
+            color: #9d174d;
+            border: 1px solid #f472b6
+        }
 
-        .install-banner{display:none;background:linear-gradient(135deg,#ec4899,#f472b6);color:#fff;padding:1rem;border-radius:12px;margin-bottom:.75rem;align-items:center;justify-content:space-between;gap:.5rem}
-        .install-banner.show{display:flex}
-        .install-btn{background:#fff;color:var(--primary);border:none;padding:.5rem 1rem;border-radius:8px;font-weight:700;font-size:.85rem;cursor:pointer}
-        .install-dismiss{background:transparent;border:none;color:#fff;font-size:1.2rem;cursor:pointer;padding:0 .5rem}
+        .cal-day.future-period {
+            background: #ffe4e6;
+            color: #f43f5e;
+            opacity: .8;
+            border: 1px dashed var(--primary)
+        }
 
-        #toast{position:fixed;bottom:calc(1.5rem + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(100px);background:#1f2937;color:#fff;padding:.85rem 1.5rem;border-radius:24px;font-size:.9rem;font-weight:600;opacity:0;transition:.3s;z-index:1000;pointer-events:none;white-space:nowrap}
-        #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            justify-content: center;
+            margin-bottom: .75rem;
+            font-size: .7rem;
+            color: var(--muted)
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: .25rem
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%
+        }
+
+        .countdown-box {
+            text-align: center;
+            padding: 1rem;
+            background: var(--primary-light);
+            border-radius: 12px;
+            margin-top: .5rem
+        }
+
+        .countdown-num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1
+        }
+
+        .countdown-label {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-top: .25rem
+        }
+
+        label.field-label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 600;
+            margin: 1rem 0 .4rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        label.field-label:first-of-type {
+            margin-top: 0
+        }
+
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: .85rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--bg);
+            outline: none;
+            font-family: inherit;
+            appearance: none
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            background: #fff
+        }
+
+        textarea {
+            resize: none;
+            min-height: 70px
+        }
+
+        .day-type-selector {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: .5rem
+        }
+
+        .day-type-btn {
+            flex: 1;
+            padding: .75rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 12px;
+            background: var(--card);
+            color: var(--text);
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: .15s
+        }
+
+        .day-type-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary)
+        }
+
+        .ended-toggle {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin: 1rem 0;
+            padding: .85rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: .15s;
+            user-select: none
+        }
+
+        .ended-toggle.checked {
+            border-color: var(--primary);
+            background: var(--primary-light)
+        }
+
+        .ended-toggle input {
+            display: none
+        }
+
+        .ended-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .85rem;
+            transition: .15s;
+            flex-shrink: 0
+        }
+
+        .ended-toggle.checked .ended-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff
+        }
+
+        .ended-label {
+            font-size: .9rem;
+            font-weight: 600
+        }
+
+        .ended-hint {
+            font-size: .7rem;
+            color: var(--muted);
+            margin-top: .1rem
+        }
+
+        .symptoms-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem
+        }
+
+        .symptom-chip input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0
+        }
+
+        .symptom-chip span {
+            display: inline-flex;
+            align-items: center;
+            padding: .5rem .85rem;
+            border-radius: 24px;
+            background: var(--primary-light);
+            font-size: .85rem;
+            cursor: pointer;
+            min-height: 44px;
+            transition: .15s
+        }
+
+        .symptom-chip input:checked+span {
+            background: var(--primary);
+            color: #fff
+        }
+
+        #save-btn {
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 52px
+        }
+
+        #save-btn:active {
+            transform: scale(.97)
+        }
+
+        .data-actions {
+            display: flex;
+            gap: .5rem;
+            margin-top: 1rem
+        }
+
+        .data-btn {
+            flex: 1;
+            padding: .75rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 12px;
+            background: var(--card);
+            color: var(--text);
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center
+        }
+
+        #import-file {
+            display: none
+        }
+
+        .history-month-group {
+            margin-bottom: .5rem
+        }
+
+        .history-month-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: .85rem 1rem;
+            background: var(--primary-light);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: .95rem;
+            color: var(--primary);
+            cursor: pointer;
+            user-select: none;
+            transition: .15s
+        }
+
+        .history-month-header:active {
+            background: #fbcfe8
+        }
+
+        .history-month-arrow {
+            transition: transform .2s;
+            font-size: .8rem
+        }
+
+        .history-month-group.open .history-month-arrow {
+            transform: rotate(180deg)
+        }
+
+        .history-month-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .3s ease;
+            padding: 0 .5rem
+        }
+
+        .history-month-group.open .history-month-content {
+            max-height: 3000px
+        }
+
+        .history-cycle {
+            padding: .75rem 0;
+            border-bottom: 1px solid var(--primary-light)
+        }
+
+        .history-cycle:last-child {
+            border-bottom: none
+        }
+
+        .history-cycle-title {
+            font-weight: 700;
+            color: #e11d48;
+            margin-bottom: .3rem;
+            font-size: .9rem
+        }
+
+        .history-day-entry {
+            margin-left: .5rem;
+            padding: .5rem;
+            font-size: .8rem;
+            border-bottom: 1px dashed #fce7f3;
+            border-radius: 8px;
+            margin-bottom: .25rem;
+            cursor: pointer;
+            transition: .15s
+        }
+
+        .history-day-entry:last-child {
+            border-bottom: none
+        }
+
+        .history-day-entry:active {
+            background: var(--primary-light)
+        }
+
+        .history-note {
+            background: var(--primary-light);
+            padding: .3rem .5rem;
+            border-radius: 6px;
+            margin-top: .2rem;
+            font-size: .75rem;
+            word-break: break-word
+        }
+
+        .edit-hint {
+            font-size: .65rem;
+            color: var(--muted);
+            margin-left: auto;
+            padding-left: .5rem
+        }
+
+        .end-badge {
+            display: inline-block;
+            font-size: .65rem;
+            background: #fbcfe8;
+            color: #9d174d;
+            padding: .1rem .4rem;
+            border-radius: 4px;
+            margin-left: .3rem;
+            font-weight: 700
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--muted);
+            padding: 1.5rem;
+            font-size: .9rem
+        }
+
+        .install-banner {
+            display: none;
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            color: #fff;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: .75rem;
+            align-items: center;
+            justify-content: space-between;
+            gap: .5rem
+        }
+
+        .install-banner.show {
+            display: flex
+        }
+
+        .install-btn {
+            background: #fff;
+            color: var(--primary);
+            border: none;
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: .85rem;
+            cursor: pointer
+        }
+
+        .install-dismiss {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 .5rem
+        }
+
+        /* === BOTTOM SHEET (Настройки) === */
+        .sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, .4);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s
+        }
+
+        .sheet-overlay.open {
+            opacity: 1;
+            pointer-events: auto
+        }
+
+        .sheet {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--card);
+            border-radius: 20px 20px 0 0;
+            z-index: 201;
+            transform: translateY(100%);
+            transition: transform .3s ease;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: var(--safe-bottom)
+        }
+
+        .sheet.open {
+            transform: translateY(0)
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: #d1d5db;
+            border-radius: 2px;
+            margin: 12px auto 0;
+            flex-shrink: 0
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem .5rem;
+            flex-shrink: 0
+        }
+
+        .sheet-header h2 {
+            margin: 0;
+            font-size: 1.1rem
+        }
+
+        .sheet-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 0 .25rem;
+            line-height: 1
+        }
+
+        .sheet-body {
+            overflow-y: auto;
+            padding: 0 1.25rem 1.5rem;
+            -webkit-overflow-scrolling: touch
+        }
+
+        .sheet-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--primary-light)
+        }
+
+        .sheet-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0
+        }
+
+        .sheet-section-title {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .5px
+        }
+
+        .notif-master-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .85rem;
+            background: var(--primary-light);
+            border-radius: 12px;
+            margin-bottom: .75rem;
+            cursor: pointer;
+            user-select: none
+        }
+
+        .notif-master-toggle.disabled {
+            opacity: .5
+        }
+
+        .notif-switch {
+            width: 44px;
+            height: 26px;
+            border-radius: 13px;
+            background: #d1d5db;
+            position: relative;
+            transition: .2s;
+            flex-shrink: 0
+        }
+
+        .notif-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .2s
+        }
+
+        .notif-master-toggle.on .notif-switch {
+            background: var(--primary)
+        }
+
+        .notif-master-toggle.on .notif-switch::after {
+            left: 21px
+        }
+
+        .remind-days {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+            margin-top: .4rem
+        }
+
+        .remind-chip input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0
+        }
+
+        .remind-chip span {
+            display: inline-flex;
+            align-items: center;
+            padding: .5rem .75rem;
+            border-radius: 20px;
+            background: var(--bg);
+            border: 2px solid var(--primary-light);
+            font-size: .8rem;
+            cursor: pointer;
+            min-height: 40px;
+            transition: .15s
+        }
+
+        .remind-chip input:checked+span {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary)
+        }
+
+        .permission-status {
+            font-size: .8rem;
+            padding: .6rem .8rem;
+            border-radius: 8px;
+            margin-top: .5rem;
+            text-align: center
+        }
+
+        .permission-status.granted {
+            background: #d1fae5;
+            color: #065f46
+        }
+
+        .permission-status.denied {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .permission-status.default {
+            background: #fef3c7;
+            color: #92400e
+        }
+
+        .test-btn {
+            width: 100%;
+            padding: .75rem;
+            margin-top: .75rem;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            background: var(--card);
+            color: var(--primary);
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .test-btn:active {
+            background: var(--primary-light)
+        }
+
+        .test-btn:disabled {
+            opacity: .4;
+            cursor: not-allowed
+        }
+
+        .settings-hint {
+            font-size: .7rem;
+            color: var(--muted);
+            margin-top: .75rem;
+            padding: .6rem;
+            background: var(--bg);
+            border-radius: 8px;
+            line-height: 1.4
+        }
+
+        #toast {
+            position: fixed;
+            bottom: calc(1.5rem + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1f2937;
+            color: #fff;
+            padding: .85rem 1.5rem;
+            border-radius: 24px;
+            font-size: .9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: .3s;
+            z-index: 1000;
+            pointer-events: none;
+            white-space: nowrap
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1
+        }
     </style>
 </head>
+
 <body>
+    <!-- Кнопка настроек -->
+    <button class="settings-fab" id="open-settings" aria-label="Настройки">⚙️</button>
+
     <h1>🌸 Cycle Tracker</h1>
 
-    <!-- Баннер установки -->
     <div class="install-banner" id="install-banner">
-        <div style="font-size:.85rem;font-weight:600">📱 Установить на главный экран</div>
+        <div style="font-size:.85rem;font-weight:600">📱 Установить приложение</div>
         <div style="display:flex;gap:.5rem;align-items:center">
             <button class="install-btn" id="install-btn">Установить</button>
             <button class="install-dismiss" id="install-dismiss">×</button>
@@ -144,10 +822,18 @@
             <button class="cal-nav" id="next-month">›</button>
         </div>
         <div class="legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#e11d48"></div>Начало</div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--primary-light)"></div>Месячные</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#fbcfe8;border:1px solid #f472b6"></div>Конец</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#ffe4e6;border:1px dashed var(--primary)"></div>Прогноз</div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#e11d48"></div>Начало
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:var(--primary-light)"></div>Месячные
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#fbcfe8;border:1px solid #f472b6"></div>Конец
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background:#ffe4e6;border:1px dashed var(--primary)"></div>Прогноз
+            </div>
         </div>
         <div class="calendar-grid" id="calendar-grid"></div>
         <div class="countdown-box">
@@ -156,65 +842,18 @@
         </div>
     </div>
 
-    <div class="card settings-card" id="settings-card">
-        <div class="settings-toggle" onclick="toggleSettings()">
-            <h2 style="margin:0">🔔 Уведомления</h2>
-            <span class="settings-arrow">▼</span>
-        </div>
-        <div class="settings-content">
-            <div class="notif-master-toggle" id="notif-master" onclick="toggleMasterNotif()">
-                <div>
-                    <div style="font-weight:600;font-size:.9rem">Включить уведомления</div>
-                    <div style="font-size:.7rem;color:var(--muted);margin-top:.1rem" id="notif-master-hint">Напоминания о приближении месячных</div>
-                </div>
-                <div class="notif-switch"></div>
-            </div>
-
-            <div id="notif-details">
-                <label class="field-label">Напоминать за</label>
-                <div class="remind-days" id="remind-days-container"></div>
-
-                <label class="field-label" for="remind-time">Время уведомления</label>
-                <input type="time" id="remind-time" value="09:00">
-
-                <!-- НОВОЕ ПОЛЕ: Заметка для уведомления -->
-                <label class="field-label" for="notif-custom-msg">💊 Личное напоминание</label>
-                <textarea id="notif-custom-msg" rows="2" placeholder="Например: 'Выпить таблетку', 'Купить прокладки'..."></textarea>
-                <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">Этот текст будет добавлен к каждому уведомлению.</div>
-
-                <div id="permission-status" class="permission-status default">
-                    Проверка разрешения...
-                </div>
-
-                <button class="test-btn" id="request-permission-btn" onclick="requestPermission()">
-                    Запросить разрешение
-                </button>
-
-                <button class="test-btn" id="test-notif-btn" onclick="testNotification()">
-                    🔔 Отправить тестовое уведомление
-                </button>
-
-                <div class="settings-hint">
-                    💡 После установки приложения на главный экран уведомления будут приходить даже в фоне.
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="card">
         <h2 id="form-title">📝 Новая запись</h2>
         <input type="hidden" id="edit-mode" value="">
-
         <label class="field-label">Какой это день?</label>
         <div class="day-type-selector">
             <button class="day-type-btn active" data-type="start">1-й день (начало)</button>
             <button class="day-type-btn" data-type="continue">2-й, 3-й, 4-й...</button>
         </div>
-
         <label class="field-label" for="start-date">Дата</label>
         <input type="date" id="start-date">
-        <div id="date-hint" style="font-size:.75rem;color:var(--muted);margin-top:.25rem">Укажите первый день начала менструации.</div>
-
+        <div id="date-hint" style="font-size:.75rem;color:var(--muted);margin-top:.25rem">Укажите первый день начала
+            менструации.</div>
         <label class="ended-toggle" id="ended-toggle">
             <input type="checkbox" id="ended-checkbox">
             <div class="ended-checkbox" id="ended-check-icon"></div>
@@ -223,22 +862,20 @@
                 <div class="ended-hint">Отметьте, если это был последний день</div>
             </div>
         </label>
-
         <label class="field-label" for="flow-type">Обильность (сегодня)</label>
         <select id="flow-type">
             <option value="light">💧 Слабая</option>
             <option value="medium" selected>💧💧 Средняя</option>
             <option value="heavy">💧💧💧 Обильная</option>
         </select>
-
         <label class="field-label">Симптомы (сегодня)</label>
         <div class="symptoms-grid" id="symptoms-container"></div>
-
         <label class="field-label" for="note-input">Заметка</label>
         <textarea id="note-input" placeholder="Опишите самочувствие..."></textarea>
-
         <button id="save-btn" type="button">Сохранить запись</button>
-        <button id="cancel-edit-btn" type="button" style="display:none;width:100%;padding:.75rem;margin-top:.5rem;border:2px solid var(--primary-light);border-radius:12px;background:var(--card);color:var(--text);font-size:.9rem;font-weight:600;cursor:pointer">Отменить редактирование</button>
+        <button id="cancel-edit-btn" type="button"
+            style="display:none;width:100%;padding:.75rem;margin-top:.5rem;border:2px solid var(--primary-light);border-radius:12px;background:var(--card);color:var(--text);font-size:.9rem;font-weight:600;cursor:pointer">Отменить
+            редактирование</button>
     </div>
 
     <div class="card">
@@ -251,6 +888,60 @@
         </div>
     </div>
 
+    <!-- Bottom Sheet: Настройки -->
+    <div class="sheet-overlay" id="sheet-overlay"></div>
+    <div class="sheet" id="settings-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h2>⚙️ Настройки</h2>
+            <button class="sheet-close" id="close-settings">×</button>
+        </div>
+        <div class="sheet-body">
+            <!-- Секция: Длина цикла -->
+            <div class="sheet-section">
+                <div class="sheet-section-title">📏 Длина цикла</div>
+                <div id="cycle-info" style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem;line-height:1.4">
+                </div>
+                <label class="field-label" for="cycle-override-input" style="margin-top:0">Ручная корректировка</label>
+                <input type="number" id="cycle-override-input" min="18" max="45" placeholder="28"
+                    style="margin-bottom:.5rem">
+                <button id="reset-cycle-override" class="test-btn"
+                    style="display:none;margin-top:0;border-color:var(--muted);color:var(--muted)">↩️ Вернуть
+                    авто-расчёт</button>
+                <div class="settings-hint">💡 Среднее рассчитывается автоматически. Ручная правка — только при сбоях
+                    цикла.</div>
+            </div>
+
+            <!-- Секция: Уведомления -->
+            <div class="sheet-section">
+                <div class="sheet-section-title">🔔 Уведомления</div>
+                <div class="notif-master-toggle" id="notif-master" onclick="toggleMasterNotif()">
+                    <div>
+                        <div style="font-weight:600;font-size:.9rem">Включить уведомления</div>
+                        <div style="font-size:.7rem;color:var(--muted);margin-top:.1rem">Напоминания о приближении</div>
+                    </div>
+                    <div class="notif-switch"></div>
+                </div>
+                <div id="notif-details">
+                    <label class="field-label" style="margin-top:0">Напоминать за</label>
+                    <div class="remind-days" id="remind-days-container"></div>
+                    <label class="field-label" for="remind-time">Время уведомления</label>
+                    <input type="time" id="remind-time" value="09:00">
+                    <label class="field-label" for="notif-custom-msg">💊 Личное напоминание</label>
+                    <textarea id="notif-custom-msg" rows="2"
+                        placeholder="'Выпить таблетку', 'Купить прокладки'..."></textarea>
+                    <div id="permission-status" class="permission-status default">Проверка разрешения...</div>
+                    <button class="test-btn" id="request-permission-btn" onclick="requestPermission()">Запросить
+                        разрешение</button>
+                    <button class="test-btn" id="test-notif-btn" onclick="testNotification()">🔔 Тестовое
+                        уведомление</button>
+                </div>
+            </div>
+
+            <div class="settings-hint">💡 После установки на главный экран уведомления приходят даже в фоне.</div>
+        </div>
+    </div>
+
     <div id="toast"></div>
 
     <script>
@@ -258,727 +949,296 @@
         var DEFAULT_CYCLE = 28;
         var MIN_PERIOD_DURATION = 4;
         var SYMPTOMS = [
-            {id:'cramps',label:'🩸 Спазмы'},{id:'backpain',label:'💔 Спина'},
-            {id:'headache',label:'🤕 Голова'},{id:'bloating',label:'🎈 Вздутие'},
-            {id:'fatigue',label:'😴 Усталость'},{id:'mood',label:'🎭 Настроение'},
-            {id:'acne',label:'😣 Акне'},{id:'cravings',label:'🍫 Тяга'},
-            {id:'nausea',label:'🤢 Тошнота'},{id:'breast',label:'👙 Грудь'}
+            { id: 'cramps', label: '🩸 Спазмы' }, { id: 'backpain', label: '💔 Спина' },
+            { id: 'headache', label: '🤕 Голова' }, { id: 'bloating', label: '🎈 Вздутие' },
+            { id: 'fatigue', label: '😴 Усталость' }, { id: 'mood', label: '🎭 Настроение' },
+            { id: 'acne', label: '😣 Акне' }, { id: 'cravings', label: '🍫 Тяга' },
+            { id: 'nausea', label: '🤢 Тошнота' }, { id: 'breast', label: '👙 Грудь' }
         ];
         var REMIND_OPTIONS = [
-            {value: 3, label: '3 дня'},
-            {value: 2, label: '2 дня'},
-            {value: 1, label: '1 день'},
-            {value: 0, label: 'В день начала'}
+            { value: 3, label: '3 дня' }, { value: 2, label: '2 дня' },
+            { value: 1, label: '1 день' }, { value: 0, label: 'В день начала' }
         ];
 
-        var state = { records: [], cycleLength: DEFAULT_CYCLE };
-        var settings = {
-            notifications: {
-                enabled: true,
-                remindDaysBefore: [2, 1],
-                remindTime: '09:00',
-                customMessage: '', // Новое поле для личной заметки
-                lastNotified: null
-            }
-        };
+        var state = { records: [], cycleLengthOverride: null };
+        var settings = { notifications: { enabled: true, remindDaysBefore: [2, 1], remindTime: '09:00', customMessage: '', lastNotified: null } };
         var viewDate = new Date();
         var currentDayType = 'start';
         var deferredPrompt = null;
 
-        function init() {
-            loadState();
-            loadSettings();
-            renderSymptoms();
-            renderRemindDays();
-            setTodayDate();
-            bindEvents();
-            updateAll();
+        // === BOTTOM SHEET ===
+        function openSettings() {
+            document.getElementById('settings-sheet').classList.add('open');
+            document.getElementById('sheet-overlay').classList.add('open');
+            updateCycleSettingsUI();
             updateNotifUI();
-            setupInstallPrompt();
-            registerSW();
-            setTimeout(checkNotifications, 1000);
+        }
+        function closeSettings() {
+            document.getElementById('settings-sheet').classList.remove('open');
+            document.getElementById('sheet-overlay').classList.remove('open');
+        }
+
+        // === АВТОРАСЧЁТ ЦИКЛА ===
+        function calcAverageCycle() {
+            if (state.records.length < 2) return DEFAULT_CYCLE;
+            var sorted = state.records.slice().sort(function (a, b) { return a.cycleStart.localeCompare(b.cycleStart) });
+            var total = 0, count = 0;
+            for (var i = 1; i < sorted.length; i++) {
+                var diff = Math.round((new Date(sorted[i].cycleStart + 'T00:00:00') - new Date(sorted[i - 1].cycleStart + 'T00:00:00')) / 86400000);
+                if (diff >= 18 && diff <= 45) { total += diff; count++; }
+            }
+            return count > 0 ? Math.round(total / count) : DEFAULT_CYCLE;
+        }
+        function getEffectiveCycleLength() {
+            return (state.cycleLengthOverride !== null && state.cycleLengthOverride > 0) ? state.cycleLengthOverride : calcAverageCycle();
+        }
+        function updateCycleSettingsUI() {
+            var avg = calcAverageCycle(), isOvr = state.cycleLengthOverride !== null;
+            var info = document.getElementById('cycle-info'), inp = document.getElementById('cycle-override-input'), rst = document.getElementById('reset-cycle-override');
+            if (state.records.length < 2) { info.textContent = 'Нужно минимум 2 записи для авто-расчёта.'; inp.placeholder = DEFAULT_CYCLE; }
+            else { info.textContent = 'Авто-расчёт по ' + state.records.length + ' записям: ~' + avg + ' дн.'; inp.placeholder = avg; }
+            inp.value = state.cycleLengthOverride || '';
+            rst.style.display = isOvr ? 'block' : 'none';
+        }
+
+        // === INIT ===
+        function init() {
+            loadState(); loadSettings(); renderSymptoms(); renderRemindDays(); setTodayDate(); bindEvents();
+            updateAll(); setupInstallPrompt(); registerSW(); setTimeout(checkNotifications, 1000);
         }
 
         function bindEvents() {
+            document.getElementById('open-settings').addEventListener('click', openSettings);
+            document.getElementById('close-settings').addEventListener('click', closeSettings);
+            document.getElementById('sheet-overlay').addEventListener('click', closeSettings);
             document.getElementById('save-btn').addEventListener('click', saveRecord);
             document.getElementById('cancel-edit-btn').addEventListener('click', cancelEdit);
-            document.getElementById('prev-month').addEventListener('click', function(){ changeMonth(-1); });
-            document.getElementById('next-month').addEventListener('click', function(){ changeMonth(1); });
+            document.getElementById('prev-month').addEventListener('click', function () { changeMonth(-1) });
+            document.getElementById('next-month').addEventListener('click', function () { changeMonth(1) });
             document.getElementById('export-btn').addEventListener('click', exportData);
-            document.getElementById('import-trigger').addEventListener('click', function(){ document.getElementById('import-file').click(); });
+            document.getElementById('import-trigger').addEventListener('click', function () { document.getElementById('import-file').click() });
             document.getElementById('import-file').addEventListener('change', importData);
-
-            document.getElementById('remind-time').addEventListener('change', function() {
-                settings.notifications.remindTime = this.value;
-                saveSettings();
-                showToast('⏰ Время сохранено');
+            document.getElementById('remind-time').addEventListener('change', function () { settings.notifications.remindTime = this.value; saveSettings(); showToast('⏰ Время сохранено') });
+            document.getElementById('notif-custom-msg').addEventListener('input', function () { settings.notifications.customMessage = this.value.trim(); saveSettings() });
+            document.getElementById('cycle-override-input').addEventListener('change', function () {
+                var v = parseInt(this.value, 10);
+                if (v >= 18 && v <= 45) { state.cycleLengthOverride = v; persistState(); updateAll(); updateCycleSettingsUI(); showToast('✅ Длина: ' + v + ' дн.') }
+                else if (this.value === '') { state.cycleLengthOverride = null; persistState(); updateAll(); updateCycleSettingsUI(); showToast('↩️ Авто-расчёт') }
+                else { showToast('⚠️ Диапазон: 18–45'); this.value = state.cycleLengthOverride || '' }
             });
-
-            // Сохранение личной заметки при изменении
-            document.getElementById('notif-custom-msg').addEventListener('input', function() {
-                settings.notifications.customMessage = this.value.trim();
-                saveSettings();
-            });
-
+            document.getElementById('reset-cycle-override').addEventListener('click', function () { state.cycleLengthOverride = null; persistState(); updateAll(); updateCycleSettingsUI(); showToast('↩️ Авто-расчёт') });
             var btns = document.querySelectorAll('.day-type-btn');
             for (var i = 0; i < btns.length; i++) {
-                btns[i].addEventListener('click', function(e) {
+                btns[i].addEventListener('click', function (e) {
                     if (document.getElementById('edit-mode').value) return;
-                    for (var j = 0; j < btns.length; j++) btns[j].classList.remove('active');
-                    e.currentTarget.classList.add('active');
-                    currentDayType = e.currentTarget.getAttribute('data-type');
-                    updateDateHint();
-                });
+                    for (var j = 0; j < btns.length; j++)btns[j].classList.remove('active');
+                    e.currentTarget.classList.add('active'); currentDayType = e.currentTarget.getAttribute('data-type'); updateDateHint();
+                })
             }
-
-            document.getElementById('ended-toggle').addEventListener('click', function() {
-                var cb = document.getElementById('ended-checkbox');
-                cb.checked = !cb.checked;
-                this.classList.toggle('checked', cb.checked);
-                document.getElementById('ended-check-icon').textContent = cb.checked ? '✓' : '';
+            document.getElementById('ended-toggle').addEventListener('click', function () {
+                var cb = document.getElementById('ended-checkbox'); cb.checked = !cb.checked;
+                this.classList.toggle('checked', cb.checked); document.getElementById('ended-check-icon').textContent = cb.checked ? '✓' : '';
             });
-
             document.getElementById('install-btn').addEventListener('click', installApp);
-            document.getElementById('install-dismiss').addEventListener('click', function() {
-                document.getElementById('install-banner').classList.remove('show');
-            });
+            document.getElementById('install-dismiss').addEventListener('click', function () { document.getElementById('install-banner').classList.remove('show') });
         }
 
+        // === PWA ===
         function setupInstallPrompt() {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                document.getElementById('install-banner').classList.add('show');
-            });
-
-            window.addEventListener('appinstalled', () => {
-                deferredPrompt = null;
-                document.getElementById('install-banner').classList.remove('show');
-                showToast('✅ Приложение установлено!');
-            });
+            window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; document.getElementById('install-banner').classList.add('show') });
+            window.addEventListener('appinstalled', function () { deferredPrompt = null; document.getElementById('install-banner').classList.remove('show'); showToast('✅ Установлено!') });
         }
-
-        async function installApp() {
-            if (!deferredPrompt) {
-                showToast('⚠️ Установка недоступна. Используйте меню Chrome.');
-                return;
-            }
-            deferredPrompt.prompt();
-            const result = await deferredPrompt.userChoice;
-            if (result.outcome === 'accepted') {
-                showToast('✅ Установка начата');
-            }
-            deferredPrompt = null;
-            document.getElementById('install-banner').classList.remove('show');
-        }
-
+        async function installApp() { if (!deferredPrompt) { showToast('⚠️ Используйте меню Chrome'); return } deferredPrompt.prompt(); var r = await deferredPrompt.userChoice; if (r.outcome === 'accepted') showToast('✅ Установка'); deferredPrompt = null; document.getElementById('install-banner').classList.remove('show') }
         async function registerSW() {
             if (!('serviceWorker' in navigator)) return;
             try {
-                const reg = await navigator.serviceWorker.register('./sw.js');
-                console.log('✅ SW зарегистрирован');
-
-                navigator.serviceWorker.addEventListener('message', event => {
-                    if (event.data && event.data.type === 'CHECK_NOTIFICATIONS') {
-                        checkNotifications();
-                    }
-                });
-
-                if ('periodicSync' in reg) {
-                    try {
-                        const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
-                        if (status.state === 'granted') {
-                            await reg.periodicSync.register('cycle-check', {
-                                minInterval: 12 * 60 * 60 * 1000
-                            });
-                            console.log('✅ Periodic Sync активен');
-                        }
-                    } catch (e) {
-                        console.log('Periodic Sync недоступен');
-                    }
-                }
-            } catch (e) {
-                console.error('SW ошибка:', e);
-            }
+                var reg = await navigator.serviceWorker.register('./sw.js'); console.log('✅ SW');
+                navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.type === 'CHECK_NOTIFICATIONS') checkNotifications() });
+                if ('periodicSync' in reg) { try { var s = await navigator.permissions.query({ name: 'periodic-background-sync' }); if (s.state === 'granted') await reg.periodicSync.register('cycle-check', { minInterval: 12 * 60 * 60 * 1000 }) } catch (e) { } }
+            } catch (e) { console.error('SW err:', e) }
         }
 
-        function showNotification(title, options) {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({
-                    type: 'SHOW_NOTIFICATION',
-                    title: title,
-                    options: options
-                });
-            } else if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(title, options);
-            }
-        }
-
-        function toggleSettings() {
-            document.getElementById('settings-card').classList.toggle('open');
-        }
-
-        function toggleMasterNotif() {
-            settings.notifications.enabled = !settings.notifications.enabled;
-            saveSettings();
-            updateNotifUI();
-            showToast(settings.notifications.enabled ? '🔔 Уведомления включены' : '🔕 Уведомления выключены');
-        }
-
+        // === УВЕДОМЛЕНИЯ ===
+        function showNotification(t, o) { if ('serviceWorker' in navigator && navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ type: 'SHOW_NOTIFICATION', title: t, options: o }); else if ('Notification' in window && Notification.permission === 'granted') new Notification(t, o) }
+        function toggleMasterNotif() { settings.notifications.enabled = !settings.notifications.enabled; saveSettings(); updateNotifUI(); showToast(settings.notifications.enabled ? '🔔 Включены' : '🔕 Выключены') }
         function renderRemindDays() {
-            var container = document.getElementById('remind-days-container');
-            container.innerHTML = REMIND_OPTIONS.map(function(opt) {
-                var checked = settings.notifications.remindDaysBefore.indexOf(opt.value) >= 0 ? ' checked' : '';
-                return '<label class="remind-chip">' +
-                    '<input type="checkbox" value="' + opt.value + '"' + checked + '>' +
-                    '<span>' + opt.label + '</span>' +
-                '</label>';
-            }).join('');
-
-            var checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].addEventListener('change', updateRemindDays);
-            }
+            var c = document.getElementById('remind-days-container');
+            c.innerHTML = REMIND_OPTIONS.map(function (o) { var ch = settings.notifications.remindDaysBefore.indexOf(o.value) >= 0 ? ' checked' : ''; return '<label class="remind-chip"><input type="checkbox" value="' + o.value + '"' + ch + '><span>' + o.label + '</span></label>' }).join('');
+            c.querySelectorAll('input').forEach(function (cb) { cb.addEventListener('change', updateRemindDays) });
         }
-
-        function updateRemindDays() {
-            var checked = document.querySelectorAll('#remind-days-container input:checked');
-            var values = [];
-            for (var i = 0; i < checked.length; i++) {
-                values.push(parseInt(checked[i].value, 10));
-            }
-            settings.notifications.remindDaysBefore = values;
-            saveSettings();
-        }
-
+        function updateRemindDays() { var v = []; document.querySelectorAll('#remind-days-container input:checked').forEach(function (c) { v.push(parseInt(c.value, 10)) }); settings.notifications.remindDaysBefore = v; saveSettings() }
         function updateNotifUI() {
-            var master = document.getElementById('notif-master');
-            var details = document.getElementById('notif-details');
-            
-            // Заполняем поле заметки текущим значением
+            var m = document.getElementById('notif-master'), d = document.getElementById('notif-details');
             document.getElementById('notif-custom-msg').value = settings.notifications.customMessage || '';
-
-            if (settings.notifications.enabled) {
-                master.classList.add('on');
-                master.classList.remove('disabled');
-                details.style.opacity = '1';
-                details.style.pointerEvents = 'auto';
-            } else {
-                master.classList.remove('on');
-                master.classList.add('disabled');
-                details.style.opacity = '0.4';
-                details.style.pointerEvents = 'none';
-            }
+            if (settings.notifications.enabled) { m.classList.add('on'); m.classList.remove('disabled'); d.style.opacity = '1'; d.style.pointerEvents = 'auto' }
+            else { m.classList.remove('on'); m.classList.add('disabled'); d.style.opacity = '0.4'; d.style.pointerEvents = 'none' }
             updatePermissionStatus();
         }
-
         function updatePermissionStatus() {
-            var statusEl = document.getElementById('permission-status');
-            var reqBtn = document.getElementById('request-permission-btn');
-            var testBtn = document.getElementById('test-notif-btn');
-
-            if (!('Notification' in window)) {
-                statusEl.className = 'permission-status denied';
-                statusEl.textContent = '❌ Браузер не поддерживает уведомления';
-                reqBtn.disabled = true;
-                testBtn.disabled = true;
-                return;
-            }
-
-            var perm = Notification.permission;
-            if (perm === 'granted') {
-                statusEl.className = 'permission-status granted';
-                statusEl.textContent = '✅ Разрешение получено';
-                reqBtn.style.display = 'none';
-                testBtn.disabled = false;
-            } else if (perm === 'denied') {
-                statusEl.className = 'permission-status denied';
-                statusEl.textContent = '❌ Разрешение заблокировано. Откройте настройки браузера.';
-                reqBtn.style.display = 'none';
-                testBtn.disabled = true;
-            } else {
-                statusEl.className = 'permission-status default';
-                statusEl.textContent = '⚠️ Разрешение не запрошено';
-                reqBtn.style.display = 'block';
-                reqBtn.disabled = false;
-                testBtn.disabled = true;
-            }
+            var s = document.getElementById('permission-status'), rb = document.getElementById('request-permission-btn'), tb = document.getElementById('test-notif-btn');
+            if (!('Notification' in window)) { s.className = 'permission-status denied'; s.textContent = '❌ Не поддерживается'; rb.disabled = true; tb.disabled = true; return }
+            var p = Notification.permission;
+            if (p === 'granted') { s.className = 'permission-status granted'; s.textContent = '✅ Разрешено'; rb.style.display = 'none'; tb.disabled = false }
+            else if (p === 'denied') { s.className = 'permission-status denied'; s.textContent = '❌ Заблокировано'; rb.style.display = 'none'; tb.disabled = true }
+            else { s.className = 'permission-status default'; s.textContent = '⚠️ Не запрошено'; rb.style.display = 'block'; rb.disabled = false; tb.disabled = true }
         }
-
-        async function requestPermission() {
-            if (!('Notification' in window)) return;
-            const perm = await Notification.requestPermission();
-            updatePermissionStatus();
-            if (perm === 'granted') {
-                showToast('✅ Уведомления разрешены');
-                showNotification('🌸 Cycle Tracker', {
-                    body: 'Уведомления успешно настроены!',
-                    icon: './icon.svg'
-                });
-            } else if (perm === 'denied') {
-                showToast('❌ Разрешение отклонено');
-            }
-        }
-
-        function testNotification() {
-            if (Notification.permission !== 'granted') {
-                showToast('⚠️ Сначала разрешите уведомления');
-                return;
-            }
-            var customMsg = settings.notifications.customMessage;
-            var bodyText = 'Это тестовое уведомление.';
-            if (customMsg) {
-                bodyText += '\n\n💊 ' + customMsg;
-            }
-            
-            showNotification('🌸 Тестовое уведомление', {
-                body: bodyText,
-                tag: 'test',
-                icon: './icon.svg'
-            });
-            showToast('🔔 Уведомление отправлено');
-        }
-
+        async function requestPermission() { if (!('Notification' in window)) return; var p = await Notification.requestPermission(); updatePermissionStatus(); if (p === 'granted') { showToast('✅ Разрешено'); showNotification('🌸 Cycle Tracker', { body: 'Настроено!', icon: './icon.svg' }) } else showToast('❌ Отклонено') }
+        function testNotification() { if (Notification.permission !== 'granted') { showToast('⚠️ Разрешите уведомления'); return } var cm = settings.notifications.customMessage; var b = 'Тестовое уведомление.'; if (cm) b += '\n\n💊 ' + cm; showNotification('🌸 Тест', { body: b, tag: 'test', icon: './icon.svg' }); showToast('🔔 Отправлено') }
         function checkNotifications() {
-            if (!settings.notifications.enabled) return;
+            if (!settings.notifications.enabled || !state.records.length) return;
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
-            if (!state.records.length) return;
-
-            var sorted = state.records.slice().sort(function(a, b) { return b.cycleStart.localeCompare(a.cycleStart); });
-            var lastCS = new Date(sorted[0].cycleStart + 'T00:00:00');
-            var today = new Date(); today.setHours(0, 0, 0, 0);
-            var nextStart = new Date(lastCS);
-            nextStart.setDate(nextStart.getDate() + state.cycleLength);
-            var daysLeft = Math.ceil((nextStart - today) / 86400000);
-
-            var now = new Date();
-            var timeParts = settings.notifications.remindTime.split(':');
-            var remindHour = parseInt(timeParts[0], 10);
-            var remindMin = parseInt(timeParts[1], 10);
-            if (now.getHours() < remindHour || (now.getHours() === remindHour && now.getMinutes() < remindMin)) {
-                return;
-            }
-
-            if (settings.notifications.remindDaysBefore.indexOf(daysLeft) < 0) return;
-
-            var todayStr = formatDateStr(new Date());
-            var lastNotified = settings.notifications.lastNotified;
-            if (lastNotified && lastNotified.cycleStart === sorted[0].cycleStart && 
-                lastNotified.days && lastNotified.days.indexOf(daysLeft) >= 0 &&
-                lastNotified.date === todayStr) {
-                return;
-            }
-
-            var message = '';
-            if (daysLeft === 0) {
-                message = 'Сегодня ожидается начало менструации.';
-            } else if (daysLeft === 1) {
-                message = 'Завтра ожидается начало менструации. Остался 1 день.';
-            } else {
-                message = 'До начала менструации осталось ' + daysLeft + ' дн.';
-            }
-
-            // Добавляем личную заметку
-            var customMsg = settings.notifications.customMessage;
-            if (customMsg) {
-                message += '\n\n💊 ' + customMsg;
-            }
-
-            showNotification('🌸 Cycle Tracker', {
-                body: message,
-                tag: 'remind-' + daysLeft,
-                icon: './icon.svg'
-            });
-
-            if (!lastNotified || lastNotified.cycleStart !== sorted[0].cycleStart) {
-                settings.notifications.lastNotified = {
-                    cycleStart: sorted[0].cycleStart,
-                    days: [daysLeft],
-                    date: todayStr
-                };
-            } else {
-                if (lastNotified.days.indexOf(daysLeft) < 0) {
-                    lastNotified.days.push(daysLeft);
-                }
-                lastNotified.date = todayStr;
-            }
+            var sorted = state.records.slice().sort(function (a, b) { return b.cycleStart.localeCompare(a.cycleStart) });
+            var lastCS = new Date(sorted[0].cycleStart + 'T00:00:00'), today = new Date(); today.setHours(0, 0, 0, 0);
+            var cl = getEffectiveCycleLength(), ns = new Date(lastCS); ns.setDate(ns.getDate() + cl);
+            var dl = Math.ceil((ns - today) / 86400000);
+            var now = new Date(), tp = settings.notifications.remindTime.split(':');
+            if (now.getHours() < parseInt(tp[0], 10) || (now.getHours() === parseInt(tp[0], 10) && now.getMinutes() < parseInt(tp[1], 10))) return;
+            if (settings.notifications.remindDaysBefore.indexOf(dl) < 0) return;
+            var ts = formatDateStr(new Date()), ln = settings.notifications.lastNotified;
+            if (ln && ln.cycleStart === sorted[0].cycleStart && ln.days && ln.days.indexOf(dl) >= 0 && ln.date === ts) return;
+            var msg = dl === 0 ? 'Сегодня ожидается начало.' : dl === 1 ? 'Завтра начало. 1 день.' : 'До начала ' + dl + ' дн.';
+            if (settings.notifications.customMessage) msg += '\n\n💊 ' + settings.notifications.customMessage;
+            showNotification('🌸 Cycle Tracker', { body: msg, tag: 'remind-' + dl, icon: './icon.svg' });
+            if (!ln || ln.cycleStart !== sorted[0].cycleStart) settings.notifications.lastNotified = { cycleStart: sorted[0].cycleStart, days: [dl], date: ts };
+            else { if (ln.days.indexOf(dl) < 0) ln.days.push(dl); ln.date = ts }
             saveSettings();
         }
 
-        function saveSettings() {
-            try { localStorage.setItem(STORAGE_KEY + '_settings', JSON.stringify(settings)); } catch(e) {}
-        }
-
-        function loadSettings() {
+        // === STATE ===
+        function saveSettings() { try { localStorage.setItem(STORAGE_KEY + '_settings', JSON.stringify(settings)) } catch (e) { } }
+        function loadSettings() { try { var r = localStorage.getItem(STORAGE_KEY + '_settings'); if (r) { var l = JSON.parse(r); if (l.notifications) settings.notifications = l.notifications } } catch (e) { } }
+        function persistState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)) } catch (e) { } }
+        function loadState() {
             try {
-                var raw = localStorage.getItem(STORAGE_KEY + '_settings');
-                if (raw) {
-                    var loaded = JSON.parse(raw);
-                    if (loaded.notifications) settings.notifications = loaded.notifications;
+                var r = localStorage.getItem(STORAGE_KEY); if (r) {
+                    state = JSON.parse(r);
+                    if (state.records && state.records.length > 0 && !state.records[0].days) { var m = {}; state.records.forEach(function (rec) { var cs = rec.cycleStart || rec.date; if (!m[cs]) m[cs] = { cycleStart: cs, days: [] }; m[cs].days.push({ date: rec.date || cs, flow: rec.flow, symptoms: rec.symptoms || [], note: rec.note || '', isEnd: false, ts: rec.ts || Date.now() }) }); state.records = Object.values(m); persistState() }
+                    if (state.cycleLength && !state.cycleLengthOverride) { state.cycleLengthOverride = state.cycleLength; delete state.cycleLength; persistState() }
                 }
-            } catch(e) {}
+            } catch (e) { }
         }
 
-        function updateDateHint() {
-            var hint = document.getElementById('date-hint');
-            hint.textContent = currentDayType === 'start'
-                ? 'Укажите первый день начала менструации.'
-                : 'Укажите сегодняшнюю дату. Запись привяжется к последнему началу цикла.';
-        }
-
-        function startEdit(cycleStart, date) {
-            var rec = null;
-            for (var r = 0; r < state.records.length; r++) {
-                if (state.records[r].cycleStart === cycleStart) { rec = state.records[r]; break; }
-            }
-            if (!rec) return;
-            var dayEntry = null;
-            for (var d = 0; d < rec.days.length; d++) {
-                if (rec.days[d].date === date) { dayEntry = rec.days[d]; break; }
-            }
-            if (!dayEntry) return;
-
-            document.getElementById('edit-mode').value = cycleStart + '|' + date;
-            document.getElementById('start-date').value = date;
-            document.getElementById('flow-type').value = dayEntry.flow || 'medium';
-            document.getElementById('note-input').value = dayEntry.note || '';
-
-            var endedCb = document.getElementById('ended-checkbox');
-            endedCb.checked = !!dayEntry.isEnd;
-            var toggle = document.getElementById('ended-toggle');
-            toggle.classList.toggle('checked', endedCb.checked);
-            document.getElementById('ended-check-icon').textContent = endedCb.checked ? '✓' : '';
-
-            var cbs = document.querySelectorAll('#symptoms-container input[type="checkbox"]');
-            for (var i = 0; i < cbs.length; i++) {
-                cbs[i].checked = (dayEntry.symptoms && dayEntry.symptoms.indexOf(cbs[i].value) >= 0);
-            }
-
-            if (date === cycleStart) {
-                currentDayType = 'start';
-                document.querySelector('[data-type="start"]').classList.add('active');
-                document.querySelector('[data-type="continue"]').classList.remove('active');
-            } else {
-                currentDayType = 'continue';
-                document.querySelector('[data-type="continue"]').classList.add('active');
-                document.querySelector('[data-type="start"]').classList.remove('active');
-            }
-
-            document.getElementById('form-title').textContent = '✏️ Редактирование записи';
-            document.getElementById('save-btn').textContent = 'Обновить запись';
-            document.getElementById('cancel-edit-btn').style.display = 'block';
-            document.getElementById('date-hint').textContent = 'Редактируется запись за ' + new Date(date + 'T00:00:00').toLocaleDateString('ru-RU');
-            document.getElementById('form-title').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function cancelEdit() {
-            document.getElementById('edit-mode').value = '';
-            document.getElementById('form-title').textContent = '📝 Новая запись';
-            document.getElementById('save-btn').textContent = 'Сохранить запись';
-            document.getElementById('cancel-edit-btn').style.display = 'none';
-            document.getElementById('note-input').value = '';
-            var cbs = document.querySelectorAll('#symptoms-container input[type="checkbox"]');
-            for (var i = 0; i < cbs.length; i++) cbs[i].checked = false;
-            var endedCb = document.getElementById('ended-checkbox');
-            endedCb.checked = false;
-            document.getElementById('ended-toggle').classList.remove('checked');
-            document.getElementById('ended-check-icon').textContent = '';
-            currentDayType = 'start';
-            document.querySelector('[data-type="start"]').classList.add('active');
-            document.querySelector('[data-type="continue"]').classList.remove('active');
-            setTodayDate();
-            updateDateHint();
-        }
-
+        // === CALENDAR ===
         function renderCalendar() {
-            var year = viewDate.getFullYear();
-            var month = viewDate.getMonth();
+            var y = viewDate.getFullYear(), m = viewDate.getMonth();
             document.getElementById('current-month-label').textContent = viewDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
-            var firstDay = new Date(year, month, 1);
-            var lastDay = new Date(year, month + 1, 0);
-            var startDayOfWeek = (firstDay.getDay() + 6) % 7;
-            var grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-
-            ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(function(d) {
-                var el = document.createElement('div'); el.className = 'cal-weekday'; el.textContent = d; grid.appendChild(el);
-            });
-            for (var i = 0; i < startDayOfWeek; i++) {
-                var empty = document.createElement('div'); empty.className = 'cal-day empty'; grid.appendChild(empty);
-            }
-
-            var periodDates = {};
+            var fd = new Date(y, m, 1), ld = new Date(y, m + 1, 0), sdow = (fd.getDay() + 6) % 7;
+            var grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
+            ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].forEach(function (d) { var e = document.createElement('div'); e.className = 'cal-weekday'; e.textContent = d; grid.appendChild(e) });
+            for (var i = 0; i < sdow; i++) { var e = document.createElement('div'); e.className = 'cal-day empty'; grid.appendChild(e) }
+            var pd = {}, cl = getEffectiveCycleLength();
             if (state.records.length > 0) {
                 for (var r = 0; r < state.records.length; r++) {
-                    var rec = state.records[r];
-                    var cs = new Date(rec.cycleStart + 'T00:00:00');
-                    var hasExplicitEnd = false, endDate = null;
-                    for (var d = 0; d < rec.days.length; d++) {
-                        if (rec.days[d].isEnd) { hasExplicitEnd = true; endDate = new Date(rec.days[d].date + 'T00:00:00'); }
-                    }
-                    if (hasExplicitEnd) {
-                        var duration = Math.max(1, Math.round((endDate - cs) / 86400000) + 1);
-                        for (var pd = 0; pd < duration; pd++) {
-                            var pDate = new Date(cs); pDate.setDate(pDate.getDate() + pd);
-                            var pStr = formatDateStr(pDate);
-                            if (pd === 0) periodDates[pStr] = 'start';
-                            else if (pd === duration - 1 && duration > 1) periodDates[pStr] = 'end';
-                            else periodDates[pStr] = 'period';
-                        }
-                    } else {
-                        var maxFactDate = new Date(rec.cycleStart + 'T00:00:00');
-                        for (var d2 = 0; d2 < rec.days.length; d2++) {
-                            var entryDate = new Date(rec.days[d2].date + 'T00:00:00');
-                            if (entryDate > maxFactDate) maxFactDate = entryDate;
-                        }
-                        var factDuration = Math.round((maxFactDate - cs) / 86400000) + 1;
-                        var displayDuration = Math.max(factDuration, MIN_PERIOD_DURATION);
-                        for (var pd2 = 0; pd2 < displayDuration; pd2++) {
-                            var pDate2 = new Date(cs); pDate2.setDate(pDate2.getDate() + pd2);
-                            var pStr2 = formatDateStr(pDate2);
-                            if (pd2 === 0) periodDates[pStr2] = 'start';
-                            else if (pd2 === displayDuration - 1 && displayDuration > 1) {
-                                periodDates[pStr2] = (pd2 < factDuration) ? 'end' : 'period';
-                            } else periodDates[pStr2] = 'period';
-                        }
+                    var rec = state.records[r], cs = new Date(rec.cycleStart + 'T00:00:00'), he = false, ed = null;
+                    for (var d = 0; d < rec.days.length; d++) { if (rec.days[d].isEnd) { he = true; ed = new Date(rec.days[d].date + 'T00:00:00') } }
+                    if (he) { var dur = Math.max(1, Math.round((ed - cs) / 86400000) + 1); for (var p = 0; p < dur; p++) { var dt = new Date(cs); dt.setDate(dt.getDate() + p); var s = formatDateStr(dt); if (p === 0) pd[s] = 'start'; else if (p === dur - 1 && dur > 1) pd[s] = 'end'; else pd[s] = 'period' } }
+                    else {
+                        var mf = new Date(rec.cycleStart + 'T00:00:00'); for (var d2 = 0; d2 < rec.days.length; d2++) { var ed2 = new Date(rec.days[d2].date + 'T00:00:00'); if (ed2 > mf) mf = ed2 } var fDur = Math.round((mf - cs) / 86400000) + 1, dDur = Math.max(fDur, MIN_PERIOD_DURATION);
+                        for (var p2 = 0; p2 < dDur; p2++) { var dt2 = new Date(cs); dt2.setDate(dt2.getDate() + p2); var s2 = formatDateStr(dt2); if (p2 === 0) pd[s2] = 'start'; else if (p2 === dDur - 1 && dDur > 1) pd[s2] = (p2 < fDur) ? 'end' : 'period'; else pd[s2] = 'period' }
                     }
                 }
-                var sorted = state.records.slice().sort(function(a, b) { return b.cycleStart.localeCompare(a.cycleStart); });
-                var lastCS = new Date(sorted[0].cycleStart + 'T00:00:00');
-                var today = new Date(); today.setHours(0,0,0,0);
-                for (var c = 1; c <= 8; c++) {
-                    var ns = new Date(lastCS); ns.setDate(ns.getDate() + (c * state.cycleLength));
-                    if (ns <= today) continue;
-                    for (var fd = 0; fd < MIN_PERIOD_DURATION; fd++) {
-                        var fDate = new Date(ns); fDate.setDate(fDate.getDate() + fd);
-                        var fStr = formatDateStr(fDate);
-                        if (!periodDates[fStr]) periodDates[fStr] = 'future';
-                    }
-                }
+                var sorted = state.records.slice().sort(function (a, b) { return b.cycleStart.localeCompare(a.cycleStart) });
+                var lcs = new Date(sorted[0].cycleStart + 'T00:00:00'), today = new Date(); today.setHours(0, 0, 0, 0);
+                for (var c = 1; c <= 8; c++) { var ns = new Date(lcs); ns.setDate(ns.getDate() + (c * cl)); if (ns <= today) continue; for (var f = 0; f < MIN_PERIOD_DURATION; f++) { var ft = new Date(ns); ft.setDate(ft.getDate() + f); var fs = formatDateStr(ft); if (!pd[fs]) pd[fs] = 'future' } }
             }
-
-            var todayStr = formatDateStr(new Date());
-            for (var day = 1; day <= lastDay.getDate(); day++) {
-                var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-                var dayEl = document.createElement('div'); dayEl.className = 'cal-day'; dayEl.textContent = day;
-                if (dateStr === todayStr) dayEl.classList.add('today');
-                var type = periodDates[dateStr];
-                if (type === 'start') dayEl.classList.add('period-start');
-                else if (type === 'end') dayEl.classList.add('period-end');
-                else if (type === 'period') dayEl.classList.add('period-day');
-                else if (type === 'future') dayEl.classList.add('future-period');
-                grid.appendChild(dayEl);
-            }
+            var ts = formatDateStr(new Date());
+            for (var day = 1; day <= ld.getDate(); day++) { var ds = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0'); var de = document.createElement('div'); de.className = 'cal-day'; de.textContent = day; if (ds === ts) de.classList.add('today'); var t = pd[ds]; if (t === 'start') de.classList.add('period-start'); else if (t === 'end') de.classList.add('period-end'); else if (t === 'period') de.classList.add('period-day'); else if (t === 'future') de.classList.add('future-period'); grid.appendChild(de) }
         }
-
-        function formatDateStr(date) {
-            return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
-        }
-        function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderCalendar(); }
-
+        function formatDateStr(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') }
+        function changeMonth(d) { viewDate.setMonth(viewDate.getMonth() + d); renderCalendar() }
         function updateCountdown() {
-            if (!state.records.length) {
-                document.getElementById('days-left').textContent = '--';
-                document.getElementById('countdown-text').textContent = 'нет данных'; return;
-            }
-            var sorted = state.records.slice().sort(function(a,b){return b.cycleStart.localeCompare(a.cycleStart)});
-            var lastCS = new Date(sorted[0].cycleStart + 'T00:00:00');
-            var today = new Date(); today.setHours(0,0,0,0);
-            var nextStart = new Date(lastCS); nextStart.setDate(nextStart.getDate() + state.cycleLength);
-            var daysLeft = Math.ceil((nextStart - today) / 86400000);
-            if (daysLeft < 0) daysLeft = 0;
-            document.getElementById('days-left').textContent = daysLeft;
-            var label = 'дней до следующих месячных';
-            if (daysLeft === 1) label = 'день до следующих месячных';
-            else if (daysLeft >= 2 && daysLeft <= 4) label = 'дня до следующих месячных';
-            else if (daysLeft === 0) label = 'месячные должны начаться сегодня';
-            document.getElementById('countdown-text').textContent = label;
+            if (!state.records.length) { document.getElementById('days-left').textContent = '--'; document.getElementById('countdown-text').textContent = 'нет данных'; return }
+            var sorted = state.records.slice().sort(function (a, b) { return b.cycleStart.localeCompare(a.cycleStart) });
+            var lcs = new Date(sorted[0].cycleStart + 'T00:00:00'), today = new Date(); today.setHours(0, 0, 0, 0);
+            var ns = new Date(lcs); ns.setDate(ns.getDate() + getEffectiveCycleLength());
+            var dl = Math.ceil((ns - today) / 86400000); if (dl < 0) dl = 0;
+            document.getElementById('days-left').textContent = dl;
+            var lb = 'дней до следующих месячных'; if (dl === 1) lb = 'день до следующих'; else if (dl >= 2 && dl <= 4) lb = 'дня до следующих'; else if (dl === 0) lb = 'должны начаться сегодня';
+            document.getElementById('countdown-text').textContent = lb;
+        }
+        function updateAll() { renderCalendar(); updateCountdown(); renderHistory() }
+        function renderSymptoms() { document.getElementById('symptoms-container').innerHTML = SYMPTOMS.map(function (s) { return '<label class="symptom-chip"><input type="checkbox" value="' + s.id + '"><span>' + s.label + '</span></label>' }).join('') }
+        function setTodayDate() { document.getElementById('start-date').value = formatDateStr(new Date()) }
+        function updateDateHint() { document.getElementById('date-hint').textContent = currentDayType === 'start' ? 'Укажите первый день начала менструации.' : 'Укажите сегодняшнюю дату. Запись привяжется к последнему началу.' }
+
+        // === EDIT ===
+        function startEdit(cs, date) {
+            var rec = null; for (var r = 0; r < state.records.length; r++) { if (state.records[r].cycleStart === cs) { rec = state.records[r]; break } } if (!rec) return;
+            var de = null; for (var d = 0; d < rec.days.length; d++) { if (rec.days[d].date === date) { de = rec.days[d]; break } } if (!de) return;
+            document.getElementById('edit-mode').value = cs + '|' + date; document.getElementById('start-date').value = date;
+            document.getElementById('flow-type').value = de.flow || 'medium'; document.getElementById('note-input').value = de.note || '';
+            var ecb = document.getElementById('ended-checkbox'); ecb.checked = !!de.isEnd;
+            document.getElementById('ended-toggle').classList.toggle('checked', ecb.checked); document.getElementById('ended-check-icon').textContent = ecb.checked ? '✓' : '';
+            document.querySelectorAll('#symptoms-container input[type="checkbox"]').forEach(function (c) { c.checked = (de.symptoms && de.symptoms.indexOf(c.value) >= 0) });
+            if (date === cs) { currentDayType = 'start'; document.querySelector('[data-type="start"]').classList.add('active'); document.querySelector('[data-type="continue"]').classList.remove('active') }
+            else { currentDayType = 'continue'; document.querySelector('[data-type="continue"]').classList.add('active'); document.querySelector('[data-type="start"]').classList.remove('active') }
+            document.getElementById('form-title').textContent = '✏️ Редактирование'; document.getElementById('save-btn').textContent = 'Обновить';
+            document.getElementById('cancel-edit-btn').style.display = 'block';
+            document.getElementById('date-hint').textContent = 'Редактируется: ' + new Date(date + 'T00:00:00').toLocaleDateString('ru-RU');
+            document.getElementById('form-title').scrollIntoView({ behavior: 'smooth' });
+        }
+        function cancelEdit() {
+            document.getElementById('edit-mode').value = ''; document.getElementById('form-title').textContent = '📝 Новая запись';
+            document.getElementById('save-btn').textContent = 'Сохранить запись'; document.getElementById('cancel-edit-btn').style.display = 'none';
+            document.getElementById('note-input').value = '';
+            document.querySelectorAll('#symptoms-container input[type="checkbox"]').forEach(function (c) { c.checked = false });
+            document.getElementById('ended-checkbox').checked = false; document.getElementById('ended-toggle').classList.remove('checked'); document.getElementById('ended-check-icon').textContent = '';
+            currentDayType = 'start'; document.querySelector('[data-type="start"]').classList.add('active'); document.querySelector('[data-type="continue"]').classList.remove('active');
+            setTodayDate(); updateDateHint();
         }
 
-        function updateAll() { renderCalendar(); updateCountdown(); renderHistory(); }
-        function renderSymptoms() {
-            document.getElementById('symptoms-container').innerHTML = SYMPTOMS.map(function(s) {
-                return '<label class="symptom-chip"><input type="checkbox" value="'+s.id+'"><span>'+s.label+'</span></label>';
-            }).join('');
-        }
-        function setTodayDate() { document.getElementById('start-date').value = formatDateStr(new Date()); }
-
+        // === SAVE ===
         function saveRecord() {
-            var dateVal = document.getElementById('start-date').value;
-            if (!dateVal) { showToast('⚠️ Выберите дату'); return; }
-            var flow = document.getElementById('flow-type').value;
-            var note = document.getElementById('note-input').value.trim();
-            var isEnd = document.getElementById('ended-checkbox').checked;
-            var cbs = document.querySelectorAll('#symptoms-container input:checked');
-            var symptoms = []; for(var i=0;i<cbs.length;i++) symptoms.push(cbs[i].value);
-            var dayEntry = { date: dateVal, flow: flow, symptoms: symptoms, note: note, isEnd: isEnd, ts: Date.now() };
-
-            var editMode = document.getElementById('edit-mode').value;
-
-            if (editMode) {
-                var parts = editMode.split('|');
-                var editCycleStart = parts[0];
-                var editDate = parts[1];
-                for (var r = 0; r < state.records.length; r++) {
-                    if (state.records[r].cycleStart === editCycleStart) {
-                        for (var d = 0; d < state.records[r].days.length; d++) {
-                            if (state.records[r].days[d].date === editDate) {
-                                state.records[r].days[d] = dayEntry;
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-                showToast('✅ Запись обновлена');
-                cancelEdit();
-            } else if (currentDayType === 'start') {
-                state.records.push({ cycleStart: dateVal, days: [dayEntry] });
-                showToast(isEnd ? '✅ Начало и конец сохранены' : '✅ Начало цикла сохранено');
-            } else {
-                if (!state.records.length) { showToast('⚠️ Сначала зафиксируйте 1-й день'); return; }
-                var sorted = state.records.slice().sort(function(a,b){return b.cycleStart.localeCompare(a.cycleStart)});
-                var lastRecord = sorted[0];
-                var existingIndex = -1;
-                for (var d2 = 0; d2 < lastRecord.days.length; d2++) {
-                    if (lastRecord.days[d2].date === dateVal) { existingIndex = d2; break; }
-                }
-                if (existingIndex >= 0) {
-                    lastRecord.days[existingIndex] = dayEntry;
-                    showToast('✅ Запись обновлена');
-                } else {
-                    lastRecord.days.push(dayEntry);
-                    showToast(isEnd ? '✅ Последний день сохранён' : '✅ День цикла сохранён');
-                }
+            var dv = document.getElementById('start-date').value; if (!dv) { showToast('⚠️ Выберите дату'); return }
+            var fl = document.getElementById('flow-type').value, nt = document.getElementById('note-input').value.trim(), ie = document.getElementById('ended-checkbox').checked;
+            var sy = []; document.querySelectorAll('#symptoms-container input:checked').forEach(function (c) { sy.push(c.value) });
+            var de = { date: dv, flow: fl, symptoms: sy, note: nt, isEnd: ie, ts: Date.now() }, em = document.getElementById('edit-mode').value;
+            if (em) { var p = em.split('|'); for (var r = 0; r < state.records.length; r++) { if (state.records[r].cycleStart === p[0]) { for (var d = 0; d < state.records[r].days.length; d++) { if (state.records[r].days[d].date === p[1]) { state.records[r].days[d] = de; break } } break } } showToast('✅ Обновлено'); cancelEdit() }
+            else if (currentDayType === 'start') { state.records.push({ cycleStart: dv, days: [de] }); showToast(ie ? '✅ Начало и конец' : '✅ Начало сохранено') }
+            else {
+                if (!state.records.length) { showToast('⚠️ Сначала 1-й день'); return } var sorted = state.records.slice().sort(function (a, b) { return b.cycleStart.localeCompare(a.cycleStart) }); var lr = sorted[0], ei = -1;
+                for (var d2 = 0; d2 < lr.days.length; d2++) { if (lr.days[d2].date === dv) { ei = d2; break } } if (ei >= 0) { lr.days[ei] = de; showToast('✅ Обновлено') } else { lr.days.push(de); showToast(ie ? '✅ Последний день' : '✅ День сохранён') }
             }
-
-            persistState();
-            if (!editMode) {
-                document.getElementById('note-input').value = '';
-                for(var j=0;j<cbs.length;j++) cbs[j].checked = false;
-                var endedCb = document.getElementById('ended-checkbox');
-                endedCb.checked = false;
-                document.getElementById('ended-toggle').classList.remove('checked');
-                document.getElementById('ended-check-icon').textContent = '';
-                setTodayDate();
-            }
-            updateAll();
+            persistState(); if (!em) { document.getElementById('note-input').value = ''; document.querySelectorAll('#symptoms-container input:checked').forEach(function (c) { c.checked = false }); document.getElementById('ended-checkbox').checked = false; document.getElementById('ended-toggle').classList.remove('checked'); document.getElementById('ended-check-icon').textContent = ''; setTodayDate() }
+            updateAll(); updateCycleSettingsUI();
         }
 
+        // === HISTORY ===
         function renderHistory() {
-            var list = document.getElementById('history-list');
-            if (!state.records.length) { list.innerHTML = '<div class="empty-history">История пуста</div>'; return; }
-            var fm = {light:'💧',medium:'💧💧',heavy:'💧💧💧'};
-            var sl = {}; SYMPTOMS.forEach(function(s){sl[s.id]=s.label});
-            var groups = {}, groupKeys = [];
-            var sorted = state.records.slice().sort(function(a,b){return b.cycleStart.localeCompare(a.cycleStart)});
+            var list = document.getElementById('history-list'); if (!state.records.length) { list.innerHTML = '<div class="empty-history">История пуста</div>'; return }
+            var fm = { light: '💧', medium: '💧💧', heavy: '💧💧💧' }, sl = {}; SYMPTOMS.forEach(function (s) { sl[s.id] = s.label });
+            var groups = {}, gk = []; var sorted = state.records.slice().sort(function (a, b) { return b.cycleStart.localeCompare(a.cycleStart) });
             for (var r = 0; r < sorted.length; r++) {
-                var rec = sorted[r];
-                var d = new Date(rec.cycleStart + 'T00:00:00');
-                var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-                var label = d.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
-                label = label.charAt(0).toUpperCase() + label.slice(1);
-                if (!groups[key]) { groups[key] = {label:label,records:[]}; groupKeys.push(key); }
-                groups[key].records.push(rec);
+                var rec = sorted[r], d = new Date(rec.cycleStart + 'T00:00:00'), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                var lb = d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }); lb = lb.charAt(0).toUpperCase() + lb.slice(1); if (!groups[k]) { groups[k] = { label: lb, records: [] }; gk.push(k) } groups[k].records.push(rec)
             }
-            var html = '';
-            for (var g = 0; g < groupKeys.length; g++) {
-                var key = groupKeys[g], group = groups[key];
-                var isOpen = (g === 0) ? ' open' : '';
-                html += '<div class="history-month-group'+isOpen+'">';
-                html += '<div class="history-month-header" onclick="toggleMonth(this)">';
-                html += '<span>'+group.label+' ('+group.records.length+')</span>';
-                html += '<span class="history-month-arrow">▼</span></div>';
-                html += '<div class="history-month-content">';
-                for (var ri = 0; ri < group.records.length; ri++) {
-                    var rec2 = group.records[ri];
-                    var startDate = new Date(rec2.cycleStart+'T00:00:00').toLocaleDateString('ru-RU');
-                    html += '<div class="history-cycle">';
-                    html += '<div class="history-cycle-title">🔴 Начало: '+startDate+'</div>';
-                    var daysSorted = rec2.days.slice().sort(function(a,b){return a.date.localeCompare(b.date)});
-                    for (var di = 0; di < daysSorted.length; di++) {
-                        var day = daysSorted[di];
-                        var dt = new Date(day.date+'T00:00:00').toLocaleDateString('ru-RU');
-                        var sy = day.symptoms.map(function(id){return sl[id]||id}).join(' ');
-                        var endBadge = day.isEnd ? '<span class="end-badge">КОНЕЦ</span>' : '';
-                        html += '<div class="history-day-entry" onclick="startEdit(\''+rec2.cycleStart+'\',\''+day.date+'\')">';
-                        html += '<div style="display:flex;align-items:center"><b>'+dt+'</b>'+endBadge+'<span style="margin-left:auto">'+(fm[day.flow]||'')+'</span><span class="edit-hint">✏️</span></div>';
-                        if (sy) html += '<div style="color:var(--muted)">'+sy+'</div>';
-                        if (day.note) html += '<div class="history-note">📝 '+escapeHtml(day.note)+'</div>';
-                        html += '</div>';
-                    }
-                    html += '</div>';
-                }
-                html += '</div></div>';
+            var html = ''; for (var g = 0; g < gk.length; g++) {
+                var k = gk[g], gr = groups[k], io = (g === 0) ? ' open' : '';
+                html += '<div class="history-month-group' + io + '"><div class="history-month-header" onclick="toggleMonth(this)"><span>' + gr.label + ' (' + gr.records.length + ')</span><span class="history-month-arrow">▼</span></div><div class="history-month-content">';
+                for (var ri = 0; ri < gr.records.length; ri++) {
+                    var rc = gr.records[ri], sd = new Date(rc.cycleStart + 'T00:00:00').toLocaleDateString('ru-RU');
+                    html += '<div class="history-cycle"><div class="history-cycle-title">🔴 Начало: ' + sd + '</div>';
+                    var ds = rc.days.slice().sort(function (a, b) { return a.date.localeCompare(b.date) });
+                    for (var di = 0; di < ds.length; di++) {
+                        var dy = ds[di], dt = new Date(dy.date + 'T00:00:00').toLocaleDateString('ru-RU'), sy = dy.symptoms.map(function (id) { return sl[id] || id }).join(' '), eb = dy.isEnd ? '<span class="end-badge">КОНЕЦ</span>' : '';
+                        html += '<div class="history-day-entry" onclick="startEdit(\'' + rc.cycleStart + '\',\'' + dy.date + '\')"><div style="display:flex;align-items:center"><b>' + dt + '</b>' + eb + '<span style="margin-left:auto">' + (fm[dy.flow] || '') + '</span><span class="edit-hint">✏️</span></div>';
+                        if (sy) html += '<div style="color:var(--muted)">' + sy + '</div>'; if (dy.note) html += '<div class="history-note">📝 ' + escapeHtml(dy.note) + '</div>'; html += '</div>'
+                    } html += '</div>'
+                } html += '</div></div>'
             }
             list.innerHTML = html;
         }
+        function toggleMonth(el) { el.parentElement.classList.toggle('open') }
 
-        function toggleMonth(el) { el.parentElement.classList.toggle('open'); }
+        // === EXPORT/IMPORT ===
+        function exportData() { if (!state.records.length) { showToast('Нет данных'); return } var b = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }); var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'cycle_' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); URL.revokeObjectURL(a.href); showToast('📤 Скачано') }
+        function importData(e) { var f = e.target.files[0]; if (!f) return; var r = new FileReader(); r.onload = function (ev) { try { var imp = JSON.parse(ev.target.result); if (imp.records && Array.isArray(imp.records)) { var nm = imp.records.length > 0 && !imp.records[0].days; if (nm) { var mg = {}; imp.records.forEach(function (rec) { var cs = rec.cycleStart || rec.date; if (!mg[cs]) mg[cs] = { cycleStart: cs, days: [] }; mg[cs].days.push({ date: rec.date || cs, flow: rec.flow, symptoms: rec.symptoms || [], note: rec.note || '', isEnd: false, ts: rec.ts || Date.now() }) }); imp.records = Object.values(mg) } } if (!imp.records) throw 0; if (confirm('Заменить данные (' + imp.records.length + ' циклов)?')) { state = imp; persistState(); settings.notifications.lastNotified = null; saveSettings(); updateAll(); updateCycleSettingsUI(); showToast('📥 Успешно') } } catch (err) { showToast('❌ Ошибка') } }; r.readAsText(f); e.target.value = '' }
 
-        function exportData() {
-            if (!state.records.length) { showToast('Нет данных'); return; }
-            var b = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-            var a = document.createElement('a'); a.href=URL.createObjectURL(b);
-            a.download='cycle_'+new Date().toISOString().slice(0,10)+'.json';
-            a.click(); URL.revokeObjectURL(a.href); showToast('📤 Скачано');
-        }
+        function escapeHtml(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML }
+        function showToast(m) { var t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(function () { t.classList.remove('show') }, 2500) }
 
-        function importData(e) {
-            var f = e.target.files[0]; if(!f) return;
-            var r = new FileReader();
-            r.onload = function(ev) {
-                try {
-                    var imp = JSON.parse(ev.target.result);
-                    if (imp.records && Array.isArray(imp.records)) {
-                        var needsMigration = imp.records.length > 0 && !imp.records[0].days;
-                        if (needsMigration) {
-                            var migrated = {};
-                            imp.records.forEach(function(rec) {
-                                var cs = rec.cycleStart || rec.date;
-                                if (!migrated[cs]) migrated[cs] = {cycleStart:cs,days:[]};
-                                migrated[cs].days.push({date:rec.date||cs,flow:rec.flow,symptoms:rec.symptoms||[],note:rec.note||'',isEnd:false,ts:rec.ts||Date.now()});
-                            });
-                            imp.records = Object.values(migrated);
-                        }
-                    }
-                    if (!imp.records) throw 0;
-                    if (confirm('Заменить текущие данные на импорт ('+imp.records.length+' циклов)?\n\nНастройки уведомлений сохранятся.')) {
-                        state = imp;
-                        persistState();
-                        settings.notifications.lastNotified = null;
-                        saveSettings();
-                        updateAll();
-                        showToast('📥 Успешно');
-                    }
-                } catch(err) { showToast('❌ Ошибка файла'); }
-            };
-            r.readAsText(f); e.target.value='';
-        }
-
-        function persistState() { try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){} }
-        function loadState() {
-            try {
-                var r = localStorage.getItem(STORAGE_KEY);
-                if (r) {
-                    state = JSON.parse(r);
-                    if (state.records && state.records.length > 0 && !state.records[0].days) {
-                        var migrated = {};
-                        state.records.forEach(function(rec) {
-                            var cs = rec.cycleStart || rec.date;
-                            if (!migrated[cs]) migrated[cs] = {cycleStart:cs,days:[]};
-                            migrated[cs].days.push({date:rec.date||cs,flow:rec.flow,symptoms:rec.symptoms||[],note:rec.note||'',isEnd:false,ts:rec.ts||Date.now()});
-                        });
-                        state.records = Object.values(migrated);
-                        persistState();
-                    }
-                }
-            } catch(e) {}
-        }
-        function escapeHtml(t) { var d=document.createElement('div');d.textContent=t;return d.innerHTML; }
-        function showToast(m) { var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500); }
-
-        if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
     </script>
 </body>
+
 </html>
